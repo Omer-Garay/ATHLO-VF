@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  ActivityIndicator, RefreshControl, Alert, TextInput, Modal,
+  ActivityIndicator, RefreshControl, TextInput, Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { AppTheme } from "@/constants/theme";
+import { webAlert } from "@/lib/alert";
 import { BookingsService, Booking } from "@/services/bookings.service";
 
 const C = AppTheme.colors;
@@ -29,7 +30,7 @@ export default function ReservasScreen() {
       const data = await BookingsService.getMyBookings();
       setBookings(data.bookings);
     } catch {
-      Alert.alert("Error", "No se pudieron cargar las reservas");
+      webAlert("Error", "No se pudieron cargar las reservas");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -58,17 +59,17 @@ export default function ReservasScreen() {
 
   const handleConfirmCancel = async () => {
     if (!selectedBooking || !cancelReason.trim()) {
-      Alert.alert("Error", "Por favor ingresa una razón para cancelar");
+      webAlert("Error", "Por favor ingresa una razón para cancelar");
       return;
     }
     setCancelling(true);
     try {
       await BookingsService.cancelBooking(selectedBooking.booking_id, cancelReason);
       setCancelModalVisible(false);
-      Alert.alert("Listo", "Reserva cancelada exitosamente");
+      webAlert("Listo", "Reserva cancelada exitosamente");
       loadBookings();
     } catch (err: any) {
-      Alert.alert("Error", err.message || "No se pudo cancelar la reserva");
+      webAlert("Error", err.message || "No se pudo cancelar la reserva");
     } finally {
       setCancelling(false);
     }
