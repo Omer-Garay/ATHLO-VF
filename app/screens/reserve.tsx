@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Image, ActivityIndicator, Alert,
+  Image, ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppTheme } from "@/constants/theme";
+import { webAlert, webConfirm } from "@/lib/alert";
 import { CourtsService, Court, TimeSlot } from "@/services/courts.service";
 import { BookingsService } from "@/services/bookings.service";
 
@@ -43,7 +44,7 @@ export default function ReserveScreen() {
       const data = await CourtsService.getCourtById(Number(courtId));
       setCourt(data.court);
     } catch {
-      Alert.alert("Error", "No se pudo cargar la cancha");
+      webAlert("Error", "No se pudo cargar la cancha");
       router.back();
     } finally {
       setLoading(false);
@@ -65,7 +66,7 @@ export default function ReserveScreen() {
     } catch (error) {
       console.error("Error al cargar slots:", error);
       setTimeSlots([]);
-      Alert.alert("Aviso", "No se pudieron sincronizar los horarios disponibles.");
+      webAlert("Aviso", "No se pudieron sincronizar los horarios disponibles.");
       setIsClosed(true);
     } finally {
       setSlotsLoading(false);
@@ -95,36 +96,29 @@ export default function ReserveScreen() {
 
   const handleBook = async () => {
     if (!selectedSlot || !court) return;
-    Alert.alert(
+
+    const confirmed = await webConfirm(
       "Confirmar Reserva",
-      `${court.field_name}\n${formatDateLabel(selectedDate)} · ${selectedSlot.start_time.slice(0, 5)} – ${selectedSlot.end_time.slice(0, 5)}\n\nTotal: L ${court.price_per_hour.toFixed(2)}`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Reservar ahora",
-          onPress: async () => {
-            setBookingLoading(true);
-            try {
-              await BookingsService.createBooking({
-                field_id: court.field_id,
-                booking_date: selectedDate,
-                start_time: selectedSlot.start_time,
-                end_time: selectedSlot.end_time,
-                number_of_players: numPlayers,
-              });
-              Alert.alert("¡Reserva Confirmada! 🎉", "Tu cancha ha sido reservada exitosamente.", [
-                { text: "Ver mis reservas", onPress: () => router.replace("/(tabs)/reservas") },
-                { text: "Volver al inicio", onPress: () => router.replace("/(tabs)") },
-              ]);
-            } catch (err: any) {
-              Alert.alert("Error", err.message || "No se pudo crear la reserva");
-            } finally {
-              setBookingLoading(false);
-            }
-          },
-        },
-      ]
+      `${court.field_name}\n${formatDateLabel(selectedDate)} · ${selectedSlot.start_time.slice(0, 5)} – ${selectedSlot.end_time.slice(0, 5)}\n\nTotal: L ${court.price_per_hour.toFixed(2)}`
     );
+    if (!confirmed) return;
+
+    setBookingLoading(true);
+    try {
+      await BookingsService.createBooking({
+        field_id: court.field_id,
+        booking_date: selectedDate,
+        start_time: selectedSlot.start_time,
+        end_time: selectedSlot.end_time,
+        number_of_players: numPlayers,
+      });
+      webAlert("¡Reserva Confirmada! 🎉", "Tu cancha ha sido reservada exitosamente.");
+      router.replace("/(tabs)/reservas");
+    } catch (err: any) {
+      webAlert("Error", err.message || "No se pudo crear la reserva");
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   if (loading || !court) {
