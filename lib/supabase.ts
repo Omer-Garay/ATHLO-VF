@@ -1,24 +1,33 @@
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 import { createClient } from "@supabase/supabase-js";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// ⚙️ CONFIGURACIÓN: Reemplaza con tus credenciales de Supabase
-// Ve a: supabase.com → Tu proyecto → Settings → API
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "https://brcxuzhqxnstxyczjont.supabase.co";
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyY3h1emhxeG5zdHh5Y3pqb250Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMjUyMDksImV4cCI6MjA4OTkwMTIwOX0.nSjBpuLJaYPey47WkF9husTqKz6JWXImcQ0bwRbUejE";
+
+// En web usamos localStorage, en móvil usamos AsyncStorage
+// Esto evita el error "window is not defined" durante el build de Vercel
+const getStorage = () => {
+  if (Platform.OS === "web") {
+    // localStorage está disponible en el navegador
+    return {
+      getItem: (key: string) => Promise.resolve(localStorage.getItem(key)),
+      setItem: (key: string, value: string) => Promise.resolve(localStorage.setItem(key, value)),
+      removeItem: (key: string) => Promise.resolve(localStorage.removeItem(key)),
+    };
+  }
+  // En móvil usamos AsyncStorage
+  const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+  return AsyncStorage;
+};
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: AsyncStorage,
+    storage: getStorage(),
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: Platform.OS === "web",
   },
 });
 
-// URL base del backend (Supabase Edge Functions o tu servidor Node)
-// Opción A - Supabase Edge Functions:
-//   https://TU_PROYECTO.supabase.co/functions/v1/athlo-api
-// Opción B - Servidor Node propio:
-//   http://localhost:3000 (desarrollo) | https://api.athlo.hn (producción)
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://IP WIFI:3000";
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? "";
+
