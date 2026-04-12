@@ -1,6 +1,17 @@
 import React from "react";
-import { View, ViewStyle } from "react-native";
-import Svg, { Path, G } from "react-native-svg";
+import { View, ViewStyle, Platform, Image } from "react-native";
+
+// react-native-svg no funciona en web sin configuración extra.
+// En web usamos una imagen PNG del logo como fallback.
+let Svg: any = null, Path: any = null, G: any = null;
+if (Platform.OS !== "web") {
+  try {
+    const RNSvg = require("react-native-svg");
+    Svg = RNSvg.Svg;
+    Path = RNSvg.Path;
+    G = RNSvg.G;
+  } catch {}
+}
 
 interface AthloLogoProps {
   /** Tamaño base del logo (ancho) */
@@ -21,11 +32,23 @@ export const AthloLogo = ({
   const height = size * aspectRatio;
   
 
+  // Fallback para web: mostrar logo como imagen PNG
+  if (Platform.OS === "web" || !Svg) {
+    return (
+      <View style={[{ width: size, height: height, alignItems: "center", justifyContent: "center" }, style]}>
+        <Image
+          source={require("../assets/images/logo-athlo.png")}
+          style={{ width: size, height: height, resizeMode: "contain" }}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={[{ 
         width: size, 
         height: height, 
-        backgroundColor: 'transparent', // <--- Forzamos transparencia
+        backgroundColor: 'transparent',
         alignItems: 'center', 
         justifyContent: 'center' 
       }, style]}>
