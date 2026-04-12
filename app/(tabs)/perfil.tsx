@@ -1,12 +1,13 @@
 import React, { useState, useCallback } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ScrollView, Alert, Image,
+  ScrollView, Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { AppTheme } from "@/constants/theme";
+import { webConfirm, webAlert } from "@/lib/alert";
 import { supabase } from "@/lib/supabase";
 import { AuthService } from "@/services/auth.service";
 import { ProfileService } from "@/services/profile.service";
@@ -75,15 +76,14 @@ export default function PerfilScreen() {
     } catch { /* silencioso — mantiene datos actuales */ }
   };
 
-  const handleLogout = () => {
-    Alert.alert("Cerrar Sesión", "¿Estás seguro que deseas salir?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Salir",
-        style: "destructive",
-        onPress: async () => { await AuthService.logout(); },
-      },
-    ]);
+  const handleLogout = async () => {
+    const confirmed = await webConfirm(
+      "Cerrar Sesión",
+      "¿Estás seguro que deseas salir?"
+    );
+    if (confirmed) {
+      await AuthService.logout();
+    }
   };
 
   const menuGroups: { title: string; items: MenuItem[] }[] = [
