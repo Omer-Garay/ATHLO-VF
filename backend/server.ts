@@ -28,11 +28,19 @@ const PORT = process.env.PORT ?? 3000;
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(helmet());
+// Permitir cualquier origen en desarrollo y producción.
+// En producción puedes restringir a tu dominio de Vercel:
+// origin: ["https://tu-app.vercel.app", "http://localhost:8081"]
 app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  allowedHeaders: ["Authorization", "Content-Type"],
+  origin: true,  // Refleja el origen de la petición — más compatible que "*"
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Authorization", "Content-Type", "Accept"],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 }));
+// Responder preflight OPTIONS explícitamente
+app.options("*", cors());
 app.use(express.json({ limit: "5mb" }));
 app.use(morgan("dev"));
 
