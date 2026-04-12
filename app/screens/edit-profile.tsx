@@ -11,7 +11,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
+// expo-image-picker solo funciona en móvil, no en web
+let ImagePicker: any = null;
+if (Platform.OS !== "web") {
+  ImagePicker = require("expo-image-picker");
+}
 import { AppTheme } from "@/constants/theme";
 import { ProfileService, UserProfile } from "@/services/profile.service";
 
@@ -88,6 +92,10 @@ export default function EditProfileScreen() {
   };
 
   const pickFromGallery = async () => {
+    if (Platform.OS === "web" || !ImagePicker) {
+      alert("La selección de imágenes no está disponible en la versión web.");
+      return;
+    }
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert("Permiso necesario", "Necesitamos acceso a tu galería.");
@@ -108,6 +116,10 @@ export default function EditProfileScreen() {
   };
 
   const takePhoto = async () => {
+    if (Platform.OS === "web" || !ImagePicker) {
+      alert("La cámara no está disponible en la versión web.");
+      return;
+    }
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
       Alert.alert("Permiso necesario", "Necesitamos acceso a tu cámara.");
