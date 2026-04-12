@@ -7,7 +7,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
+// expo-image-picker solo funciona en móvil, no en web
+let ImagePicker: any = null;
+if (Platform.OS !== "web") {
+  ImagePicker = require("expo-image-picker");
+}
 import { AppTheme } from "@/constants/theme";
 import {
   AdminService, AdminStats, AdminCourt, AdminBooking,
