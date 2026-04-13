@@ -28,6 +28,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [role, setRole] = useState<"client" | "provider">("client");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -39,18 +40,35 @@ export default function LoginScreen() {
       Alert.alert("Error", "Por favor ingresa tu nombre");
       return;
     }
+    if (!isLogin && password.length < 6) {
+      Alert.alert("Error", "La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
     setLoading(true);
     try {
       if (isLogin) {
         await AuthService.login(email.trim(), password);
       } else {
-        await AuthService.signup(email.trim(), password, name.trim());
+        await AuthService.signup(email.trim(), password, name.trim(), role);
+        Alert.alert(
+          "¡Cuenta creada!",
+          `Tu cuenta de ${role === "provider" ? "proveedor" : "cliente"} fue creada exitosamente.`,
+          [{ text: "OK" }]
+        );
       }
     } catch (err: any) {
       Alert.alert("Error", err.message || "Error durante la autenticación");
     } finally {
       setLoading(false);
     }
+  };
+
+  const switchMode = () => {
+    setIsLogin(!isLogin);
+    setEmail("");
+    setPassword("");
+    setName("");
+    setRole("client");
   };
 
   return (
@@ -160,6 +178,50 @@ export default function LoginScreen() {
               </View>
             </View>
 
+            {/* Selector de rol (solo registro) */}
+            {!isLogin && (
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Tipo de cuenta</Text>
+                <View style={styles.roleRow}>
+                  <TouchableOpacity
+                    style={[styles.roleBtn, role === "client" && styles.roleBtnActive]}
+                    onPress={() => setRole("client")}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons
+                      name="person-outline"
+                      size={20}
+                      color={role === "client" ? "#fff" : C.textMuted}
+                    />
+                    <Text style={[styles.roleBtnText, role === "client" && styles.roleBtnTextActive]}>
+                      Cliente
+                    </Text>
+                    <Text style={[styles.roleDesc, role === "client" && styles.roleDescActive]}>
+                      Quiero reservar canchas
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.roleBtn, role === "provider" && styles.roleBtnActive]}
+                    onPress={() => setRole("provider")}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons
+                      name="business-outline"
+                      size={20}
+                      color={role === "provider" ? "#fff" : C.textMuted}
+                    />
+                    <Text style={[styles.roleBtnText, role === "provider" && styles.roleBtnTextActive]}>
+                      Proveedor
+                    </Text>
+                    <Text style={[styles.roleDesc, role === "provider" && styles.roleDescActive]}>
+                      Tengo canchas para alquilar
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
             {/* Botón principal */}
             <TouchableOpacity
               style={[styles.primaryBtn, loading && styles.btnDisabled]}
@@ -178,7 +240,7 @@ export default function LoginScreen() {
                     style={{ marginRight: 8 }}
                   />
                   <Text style={styles.primaryBtnText}>
-                    {isLogin ? "Iniciar Sesión" : "Crear Cuenta"}
+                    {isLogin ? "Iniciar Sesión" : `Crear Cuenta ${role === "provider" ? "Proveedor" : "Cliente"}`}
                   </Text>
                 </>
               )}
@@ -194,7 +256,7 @@ export default function LoginScreen() {
             {/* Toggle */}
             <TouchableOpacity
               style={styles.toggleBtn}
-              onPress={() => setIsLogin(!isLogin)}
+              onPress={switchMode}
             >
               <Text style={styles.toggleText}>
                 {isLogin ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
@@ -228,7 +290,6 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
   },
 
-  // Logo — fijo fuera del scroll, no se desplaza con el teclado
   logoSection: {
     alignItems: "center",
     paddingTop: 24,
@@ -250,7 +311,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Card
   card: {
     backgroundColor: C.white,
     borderRadius: R.xl,
@@ -289,7 +349,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // Inputs
   inputGroup: { marginBottom: 16 },
   inputLabel: {
     fontSize: T.small,
@@ -315,7 +374,43 @@ const styles = StyleSheet.create({
   },
   inputFlex: { flex: 1 },
 
-  // Botón
+  // Selector de rol
+  roleRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  roleBtn: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderRadius: R.md,
+    borderWidth: 2,
+    borderColor: C.border,
+    backgroundColor: C.inputBg,
+    gap: 4,
+  },
+  roleBtnActive: {
+    backgroundColor: C.accent,
+    borderColor: C.accent,
+  },
+  roleBtnText: {
+    fontSize: T.small,
+    fontWeight: "700",
+    color: C.textMuted,
+  },
+  roleBtnTextActive: {
+    color: "#fff",
+  },
+  roleDesc: {
+    fontSize: 11,
+    color: C.textSoft,
+    textAlign: "center",
+  },
+  roleDescActive: {
+    color: "rgba(255,255,255,0.8)",
+  },
+
   primaryBtn: {
     backgroundColor: C.accent,
     borderRadius: R.md,
@@ -334,7 +429,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // Divider
   divider: {
     flexDirection: "row",
     alignItems: "center",
@@ -351,7 +445,6 @@ const styles = StyleSheet.create({
     color: C.textSoft,
   },
 
-  // Toggle
   toggleBtn: { alignItems: "center" },
   toggleText: {
     fontSize: T.small,
@@ -362,7 +455,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // Footer
   footer: {
     textAlign: "center",
     color: "rgba(255,255,255,0.35)",
