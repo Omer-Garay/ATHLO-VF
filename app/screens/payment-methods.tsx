@@ -100,7 +100,10 @@ export default function PaymentMethodsScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color={C.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Métodos de Pago</Text>
+        <View style={styles.headerTitleRow}>
+          <Ionicons name="card-outline" size={18} color={C.accent} />
+          <Text style={styles.headerTitle}>Métodos de Pago</Text>
+        </View>
         <TouchableOpacity style={styles.addBtn} onPress={() => setShowModal(true)}>
           <Ionicons name="add" size={20} color={C.accent} />
         </TouchableOpacity>
@@ -109,7 +112,10 @@ export default function PaymentMethodsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* ── Tarjetas ────────────────────────── */}
-        <Text style={styles.sectionLabel}>Mis tarjetas</Text>
+        <View style={styles.sectionLabelRow}>
+          <Ionicons name="wallet-outline" size={15} color={C.textMuted} />
+          <Text style={styles.sectionLabel}>Mis tarjetas</Text>
+        </View>
         {methods.map((m) => {
           const [colorFrom, colorTo] = CARD_COLORS[m.type];
           return (
@@ -173,7 +179,10 @@ export default function PaymentMethodsScreen() {
         </TouchableOpacity>
 
         {/* Otros métodos */}
-        <Text style={styles.sectionLabel}>Otros métodos</Text>
+        <View style={styles.sectionLabelRow}>
+          <Ionicons name="swap-horizontal-outline" size={15} color={C.textMuted} />
+          <Text style={styles.sectionLabel}>Otros métodos</Text>
+        </View>
         {[
           {
             icon: "cash-outline" as const,
@@ -212,7 +221,10 @@ export default function PaymentMethodsScreen() {
           <View style={styles.modalCard}>
             <View style={styles.modalPill} />
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Nueva Tarjeta</Text>
+              <View style={styles.modalTitleRow}>
+                <Ionicons name="add-circle-outline" size={18} color={C.accent} />
+                <Text style={styles.modalTitle}>Nueva Tarjeta</Text>
+              </View>
               <TouchableOpacity
                 style={styles.modalCloseBtn}
                 onPress={() => setShowModal(false)}
@@ -315,10 +327,8 @@ const styles = StyleSheet.create({
     width: 36, height: 36, justifyContent: "center", alignItems: "center",
     borderRadius: 18, backgroundColor: C.accentLight,
   },
-  headerTitle: {
-    flex: 1, textAlign: "center",
-    fontSize: T.heading, fontWeight: "800", color: C.primary,
-  },
+  headerTitleRow: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  headerTitle: { fontSize: T.heading, fontWeight: "800", color: C.primary },
   addBtn: {
     width: 36, height: 36, justifyContent: "center", alignItems: "center",
     borderRadius: 18, backgroundColor: C.accentLight,
@@ -425,6 +435,7 @@ const styles = StyleSheet.create({
     flexDirection: "row", justifyContent: "space-between",
     alignItems: "center", marginBottom: 20,
   },
+  modalTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   modalTitle: { fontSize: T.heading, fontWeight: "800", color: C.primary },
   modalCloseBtn: {
     width: 32, height: 32, borderRadius: 16,
@@ -451,4 +462,5 @@ const styles = StyleSheet.create({
     flexDirection: "row", justifyContent: "center", gap: 8,
   },
   primaryBtnText: { color: "#fff", fontSize: T.body, fontWeight: "700" },
+  sectionLabelRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
 });

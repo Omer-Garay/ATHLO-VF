@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ScrollView, Image,
+  ScrollView, Image, Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -115,6 +115,12 @@ export default function PerfilScreen() {
 
   const initials = userName.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   const roleLabel = userRole === "admin" ? "Administrador" : userRole === "provider" ? "Proveedor" : null;
+  const getGroupIcon = (title: string): keyof typeof Ionicons.glyphMap =>
+    title === "Cuenta"
+      ? "person-circle-outline"
+      : title === "Soporte"
+        ? "help-buoy-outline"
+        : "log-out-outline";
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -166,7 +172,10 @@ export default function PerfilScreen() {
         <View style={styles.menuSection}>
           {menuGroups.map((group) => (
             <View key={group.title} style={styles.menuGroup}>
-              <Text style={styles.groupTitle}>{group.title}</Text>
+              <View style={styles.groupTitleRow}>
+                <Ionicons name={getGroupIcon(group.title)} size={14} color={C.textMuted} />
+                <Text style={styles.groupTitle}>{group.title}</Text>
+              </View>
               <View style={styles.menuCard}>
                 {group.items.map((item, idx) => (
                   <TouchableOpacity
@@ -211,7 +220,10 @@ export default function PerfilScreen() {
           ))}
         </View>
 
-        <Text style={styles.version}>Athlo v1.0.0 · Honduras</Text>
+        <View style={styles.versionRow}>
+          <Ionicons name="phone-portrait-outline" size={14} color={C.textSoft} />
+          <Text style={styles.version}>Athlo v1.0.0 · Honduras</Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -298,10 +310,10 @@ const styles = StyleSheet.create({
   // Menu
   menuSection: { paddingHorizontal: 16, paddingTop: 20 },
   menuGroup: { marginBottom: 20 },
+  groupTitleRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8, paddingLeft: 4 },
   groupTitle: {
     fontSize: 11, fontWeight: "700", color: C.textMuted,
     textTransform: "uppercase", letterSpacing: 1.2,
-    marginBottom: 8, paddingLeft: 4,
   },
   menuCard: {
     backgroundColor: C.white,
@@ -326,8 +338,6 @@ const styles = StyleSheet.create({
   menuLabelDanger: { color: C.danger },
   menuSublabel: { fontSize: 11, color: C.textMuted, marginTop: 1 },
 
-  version: {
-    textAlign: "center", fontSize: 11,
-    color: C.textSoft, marginBottom: 24, marginTop: 4,
-  },
+  versionRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: 24, marginTop: 4 },
+  version: { textAlign: "center", fontSize: 11, color: C.textSoft },
 });

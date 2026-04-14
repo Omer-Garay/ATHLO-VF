@@ -171,7 +171,10 @@ export default function ReservasScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* ── Header ──────────────────────────────── */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mis Reservas</Text>
+        <View style={styles.headerTitleRow}>
+          <Ionicons name="calendar-clear-outline" size={20} color={C.accent} />
+          <Text style={styles.headerTitle}>Mis Reservas</Text>
+        </View>
         <Text style={styles.headerSub}>
           {activeBookings.length} activa{activeBookings.length !== 1 ? "s" : ""}
         </Text>
@@ -227,7 +230,10 @@ export default function ReservasScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalPill} />
-            <Text style={styles.modalTitle}>Cancelar Reserva</Text>
+            <View style={styles.modalTitleRow}>
+              <Ionicons name="close-circle-outline" size={18} color={C.danger} />
+              <Text style={styles.modalTitle}>Cancelar Reserva</Text>
+            </View>
             <Text style={styles.modalSubtitle}>
               {selectedBooking?.field_name} · {selectedBooking && formatDate(selectedBooking.booking_date)}
             </Text>
@@ -288,6 +294,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4,
   },
+  headerTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   headerTitle: { fontSize: T.subtitle, fontWeight: "800", color: C.primary },
   headerSub: { fontSize: T.small, color: C.textMuted, marginTop: 2 },
 
@@ -383,6 +390,7 @@ const styles = StyleSheet.create({
     justifyContent: "center", alignItems: "center",
     marginBottom: 16,
   },
+  emptyTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   emptyTitle: { fontSize: T.body, fontWeight: "700", color: C.textMuted },
   emptySubtitle: {
     fontSize: T.small, color: C.textSoft,
@@ -400,7 +408,8 @@ const styles = StyleSheet.create({
     width: 40, height: 4, borderRadius: 2,
     backgroundColor: C.border, alignSelf: "center", marginBottom: 20,
   },
-  modalTitle: { fontSize: T.heading, fontWeight: "700", color: C.text, marginBottom: 4 },
+  modalTitleRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 },
+  modalTitle: { fontSize: T.heading, fontWeight: "700", color: C.text },
   modalSubtitle: { fontSize: T.small, color: C.textMuted, marginBottom: 20 },
   modalLabel: { fontSize: T.small, fontWeight: "600", color: C.text, marginBottom: 8 },
   modalInput: {

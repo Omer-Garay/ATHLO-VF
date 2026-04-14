@@ -37,13 +37,13 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
     .maybeSingle();
 
   if (dbErr) {
-    console.error("❌ DB ERROR:", dbErr.message);
+    console.error("DB ERROR:", dbErr.message);
     return res.status(500).json({ error: "Error interno al consultar perfil" });
   }
 
   if (!dbUser) {
     // Si esto sucede, el Trigger falló o hay un problema de RLS (permisos de lectura)
-    console.warn(`⚠️ Usuario auth existe (${authUser.email}) pero no tiene perfil en public.users`);
+    console.warn(`Aviso: el usuario auth existe (${authUser.email}) pero no tiene perfil en public.users`);
     return res.status(401).json({ error: "Perfil de usuario no sincronizado. Contacte a soporte." });
   }
 

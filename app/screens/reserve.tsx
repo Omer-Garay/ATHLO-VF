@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Image, ActivityIndicator,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,9 +30,7 @@ export default function ReserveScreen() {
   const { courtId } = useLocalSearchParams<{ courtId: string }>();
   const [court, setCourt] = useState<Court | null>(null);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("efectivo");
   const [numPlayers, setNumPlayers] = useState(2);
@@ -36,8 +39,13 @@ export default function ReserveScreen() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
 
-  useEffect(() => { if (courtId) loadCourt(); }, [courtId]);
-  useEffect(() => { if (court) loadSlots(); }, [selectedDate, court]);
+  useEffect(() => {
+    if (courtId) loadCourt();
+  }, [courtId]);
+
+  useEffect(() => {
+    if (court) loadSlots();
+  }, [selectedDate, court]);
 
   const loadCourt = async () => {
     try {
@@ -53,14 +61,13 @@ export default function ReserveScreen() {
 
   const loadSlots = async () => {
     if (!courtId) return;
-    
+
     setSlotsLoading(true);
-    setIsClosed(false); 
-    setSelectedSlot(null); 
-    
+    setIsClosed(false);
+    setSelectedSlot(null);
+
     try {
       const data = await CourtsService.getAvailableSlots(Number(courtId), selectedDate);
-      const cerrado = !!data.is_closed_day || (data.slots && data.slots.length === 0);
       setIsClosed(!!data.is_closed_day);
       setTimeSlots(data.slots || []);
     } catch (error) {
@@ -85,12 +92,14 @@ export default function ReserveScreen() {
   };
 
   const formatDateLabel = (dateStr: string) => {
-    const d = new Date(dateStr + "T00:00:00");
+    const d = new Date(`${dateStr}T00:00:00`);
     const today = new Date().toISOString().split("T")[0];
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
+
     if (dateStr === today) return "Hoy";
     if (dateStr === tomorrow.toISOString().split("T")[0]) return "Mañana";
+
     return d.toLocaleDateString("es-HN", { weekday: "short", day: "numeric", month: "short" });
   };
 
@@ -99,7 +108,7 @@ export default function ReserveScreen() {
 
     const confirmed = await webConfirm(
       "Confirmar Reserva",
-      `${court.field_name}\n${formatDateLabel(selectedDate)} · ${selectedSlot.start_time.slice(0, 5)} – ${selectedSlot.end_time.slice(0, 5)}\n\nTotal: L ${court.price_per_hour.toFixed(2)}`
+      `${court.field_name}\n${formatDateLabel(selectedDate)} · ${selectedSlot.start_time.slice(0, 5)} - ${selectedSlot.end_time.slice(0, 5)}\n\nTotal: L ${court.price_per_hour.toFixed(2)}`
     );
     if (!confirmed) return;
 
@@ -112,7 +121,7 @@ export default function ReserveScreen() {
         end_time: selectedSlot.end_time,
         number_of_players: numPlayers,
       });
-      webAlert("¡Reserva Confirmada! 🎉", "Tu cancha ha sido reservada exitosamente.");
+      webAlert("¡Reserva confirmada!", "Tu cancha ha sido reservada exitosamente.");
       router.replace("/(tabs)/reservas");
     } catch (err: any) {
       webAlert("Error", err.message || "No se pudo crear la reserva");
@@ -137,7 +146,7 @@ export default function ReserveScreen() {
       is_available: slot.is_available && slotDt > oneHourFromNow,
     };
   });
-  const availableSlots = filteredSlots.filter((s) => s.is_available).length;
+  const availableSlots = filteredSlots.filter((slot) => slot.is_available).length;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -145,7 +154,9 @@ export default function ReserveScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.navTitle} numberOfLines={1}>{court.field_name}</Text>
+        <Text style={styles.navTitle} numberOfLines={1}>
+          {court.field_name}
+        </Text>
         <View style={styles.backBtn} />
       </View>
 
@@ -171,12 +182,12 @@ export default function ReserveScreen() {
           </View>
 
           <View style={styles.ratingRow}>
-            {[1, 2, 3, 4, 5].map((s) => (
+            {[1, 2, 3, 4, 5].map((star) => (
               <Ionicons
-                key={s}
+                key={star}
                 name="star"
                 size={14}
-                color={s <= Math.round(court.rating) ? C.starColor : C.border}
+                color={star <= Math.round(court.rating) ? C.starColor : C.border}
               />
             ))}
             <Text style={styles.ratingText}>
@@ -209,7 +220,10 @@ export default function ReserveScreen() {
                 <TouchableOpacity
                   key={date}
                   style={[styles.dateChip, isSelected && styles.dateChipActive]}
-                  onPress={() => { setSelectedDate(date); setSelectedSlot(null); }}
+                  onPress={() => {
+                    setSelectedDate(date);
+                    setSelectedSlot(null);
+                  }}
                 >
                   <Text style={[styles.dateChipText, isSelected && styles.dateChipTextActive]}>
                     {formatDateLabel(date)}
@@ -251,11 +265,13 @@ export default function ReserveScreen() {
                     onPress={() => slot.is_available && setSelectedSlot(slot)}
                     disabled={!slot.is_available}
                   >
-                    <Text style={[
-                      styles.slotText,
-                      !slot.is_available && styles.slotTextDisabled,
-                      isSelected && styles.slotTextActive,
-                    ]}>
+                    <Text
+                      style={[
+                        styles.slotText,
+                        !slot.is_available && styles.slotTextDisabled,
+                        isSelected && styles.slotTextActive,
+                      ]}
+                    >
                       {slot.start_time.slice(0, 5)}
                     </Text>
                   </TouchableOpacity>
@@ -320,17 +336,26 @@ export default function ReserveScreen() {
           {selectedSlot && (
             <View style={styles.summaryBox}>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Horario seleccionado</Text>
+                <View style={styles.summaryLabelRow}>
+                  <Ionicons name="time-outline" size={14} color={C.textMuted} />
+                  <Text style={styles.summaryLabel}>Horario seleccionado</Text>
+                </View>
                 <Text style={styles.summaryValue}>
-                  {selectedSlot.start_time.slice(0, 5)} – {selectedSlot.end_time.slice(0, 5)}
+                  {selectedSlot.start_time.slice(0, 5)} - {selectedSlot.end_time.slice(0, 5)}
                 </Text>
               </View>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Fecha</Text>
+                <View style={styles.summaryLabelRow}>
+                  <Ionicons name="calendar-outline" size={14} color={C.textMuted} />
+                  <Text style={styles.summaryLabel}>Fecha</Text>
+                </View>
                 <Text style={styles.summaryValue}>{formatDateLabel(selectedDate)}</Text>
               </View>
               <View style={[styles.summaryRow, styles.summaryTotal]}>
-                <Text style={styles.summaryTotalLabel}>Total a pagar</Text>
+                <View style={styles.summaryLabelRow}>
+                  <Ionicons name="cash-outline" size={15} color={C.primary} />
+                  <Text style={styles.summaryTotalLabel}>Total a pagar</Text>
+                </View>
                 <Text style={styles.summaryTotalValue}>L {court.price_per_hour.toFixed(2)}</Text>
               </View>
             </View>
@@ -353,7 +378,7 @@ export default function ReserveScreen() {
                 />
                 <Text style={styles.bookBtnText}>
                   {selectedSlot
-                    ? `Reservar · ${selectedSlot.start_time.slice(0, 5)} – ${selectedSlot.end_time.slice(0, 5)}`
+                    ? `Reservar · ${selectedSlot.start_time.slice(0, 5)} - ${selectedSlot.end_time.slice(0, 5)}`
                     : "Selecciona un horario"}
                 </Text>
               </>
@@ -376,62 +401,184 @@ function AmenityBadge({ icon, label }: { icon: any; label: string }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: C.primary },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: C.background },
-  navHeader: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, gap: 10 },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: "rgba(1,182,239,0.2)", justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "rgba(1,182,239,0.3)" },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: C.background,
+  },
+  navHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(1,182,239,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(1,182,239,0.3)",
+  },
   navTitle: { flex: 1, textAlign: "center", fontSize: T.body, fontWeight: "700", color: "#fff" },
   courtImage: { width: "100%", height: 220 },
-  mainCard: { backgroundColor: C.white, borderTopLeftRadius: R.xl, borderTopRightRadius: R.xl, marginTop: -20, padding: 20, paddingBottom: 40 },
-  courtHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 },
+  mainCard: {
+    backgroundColor: C.white,
+    borderTopLeftRadius: R.xl,
+    borderTopRightRadius: R.xl,
+    marginTop: -20,
+    padding: 20,
+    paddingBottom: 40,
+  },
+  courtHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
   courtHeaderLeft: { flex: 1, marginRight: 12 },
   courtName: { fontSize: T.subtitle, fontWeight: "800", color: C.primary, marginBottom: 4 },
   locationRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   locationText: { fontSize: T.small, color: C.textMuted, flex: 1 },
-  priceBox: { backgroundColor: C.primary, borderRadius: R.md, paddingHorizontal: 12, paddingVertical: 8, alignItems: "center" },
+  priceBox: {
+    backgroundColor: C.primary,
+    borderRadius: R.md,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: "center",
+  },
   priceBoxAmount: { color: "#fff", fontSize: 18, fontWeight: "800" },
   priceBoxUnit: { color: "rgba(255,255,255,0.7)", fontSize: 10 },
   ratingRow: { flexDirection: "row", alignItems: "center", gap: 3, marginBottom: 12 },
   ratingText: { fontSize: T.small, color: C.textMuted, marginLeft: 4 },
   badgeRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 4 },
-  amenityBadge: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: C.accentSoft, paddingHorizontal: 10, paddingVertical: 5, borderRadius: R.xxl, borderWidth: 1, borderColor: C.accent + "30" },
+  amenityBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: C.accentSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: R.xxl,
+    borderWidth: 1,
+    borderColor: `${C.accent}30`,
+  },
   amenityBadgeText: { fontSize: 11, color: C.accentDark, fontWeight: "500" },
   divider: { height: 1, backgroundColor: C.border, marginVertical: 18 },
   sectionLabel: { fontSize: T.body, fontWeight: "700", color: C.text, marginBottom: 12 },
   dateScroll: { marginBottom: 4 },
-  dateChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: R.md, marginRight: 8, borderWidth: 1.5, borderColor: C.border, backgroundColor: C.white },
+  dateChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: R.md,
+    marginRight: 8,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    backgroundColor: C.white,
+  },
   dateChipActive: { borderColor: C.accent, backgroundColor: C.accentSoft },
   dateChipText: { fontSize: T.small, color: C.textMuted, fontWeight: "600" },
   dateChipTextActive: { color: C.accentDark, fontWeight: "700" },
-  slotsHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  slotsHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
   slotsCount: { fontSize: T.small, color: C.accent, fontWeight: "600" },
   slotsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 4 },
-  slotBtn: { width: "22%", paddingVertical: 12, borderRadius: R.sm, backgroundColor: C.accentSoft, alignItems: "center", borderWidth: 1, borderColor: C.accent + "30" },
+  slotBtn: {
+    width: "22%",
+    paddingVertical: 12,
+    borderRadius: R.sm,
+    backgroundColor: C.accentSoft,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: `${C.accent}30`,
+  },
   slotBtnActive: { backgroundColor: C.accent, borderColor: C.accent },
   slotBtnDisabled: { backgroundColor: C.inputBg, borderColor: C.border },
   slotText: { fontSize: 13, fontWeight: "600", color: C.accentDark },
   slotTextActive: { color: "#fff" },
   slotTextDisabled: { color: C.textSoft },
   playersRow: { flexDirection: "row", alignItems: "center", gap: 24, marginBottom: 4 },
-  counterBtn: { width: 42, height: 42, borderRadius: 21, borderWidth: 2, borderColor: C.accent, backgroundColor: C.accentSoft, justifyContent: "center", alignItems: "center" },
+  counterBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 2,
+    borderColor: C.accent,
+    backgroundColor: C.accentSoft,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   counterDisplay: { alignItems: "center" },
   counterValue: { fontSize: 28, fontWeight: "800", color: C.primary },
   counterSub: { fontSize: 11, color: C.textMuted },
   paymentRow: { flexDirection: "row", gap: 8 },
-  paymentChip: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 12, borderRadius: R.md, borderWidth: 1.5, borderColor: C.border, backgroundColor: C.white },
+  paymentChip: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: R.md,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    backgroundColor: C.white,
+  },
   paymentChipActive: { backgroundColor: C.primary, borderColor: C.primary },
   paymentLabel: { fontSize: 11, fontWeight: "600", color: C.textMuted },
   paymentLabelActive: { color: "#fff" },
-  closedContainer: { alignItems: "center", justifyContent: "center", paddingVertical: 40, backgroundColor: C.inputBg, borderRadius: R.md, borderWidth: 1, borderColor: C.border, marginTop: 10, marginBottom: 20, gap: 8 },
+  closedContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    backgroundColor: C.inputBg,
+    borderRadius: R.md,
+    borderWidth: 1,
+    borderColor: C.border,
+    marginTop: 10,
+    marginBottom: 20,
+    gap: 8,
+  },
   closedText: { fontSize: T.body, fontWeight: "700", color: C.text, textAlign: "center" },
   closedSubtext: { fontSize: T.small, color: C.textMuted, textAlign: "center" },
-  summaryBox: { backgroundColor: C.accentSoft, borderRadius: R.md, padding: 16, marginBottom: 18, borderWidth: 1, borderColor: C.accent + "30" },
+  summaryBox: {
+    backgroundColor: C.accentSoft,
+    borderRadius: R.md,
+    padding: 16,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: `${C.accent}30`,
+  },
+  summaryLabelRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   summaryRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
   summaryLabel: { fontSize: T.small, color: C.textMuted },
   summaryValue: { fontSize: T.small, fontWeight: "600", color: C.text },
-  summaryTotal: { borderTopWidth: 1, borderTopColor: C.accent + "40", paddingTop: 8, marginTop: 4, marginBottom: 0 },
+  summaryTotal: {
+    borderTopWidth: 1,
+    borderTopColor: `${C.accent}40`,
+    paddingTop: 8,
+    marginTop: 4,
+    marginBottom: 0,
+  },
   summaryTotalLabel: { fontSize: T.body, fontWeight: "700", color: C.primary },
   summaryTotalValue: { fontSize: T.body, fontWeight: "800", color: C.primary },
-  bookBtn: { backgroundColor: C.accent, paddingVertical: 18, borderRadius: R.lg, alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8 },
+  bookBtn: {
+    backgroundColor: C.accent,
+    paddingVertical: 18,
+    borderRadius: R.lg,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
   bookBtnDisabled: { opacity: 0.45 },
   bookBtnText: { color: "#fff", fontSize: T.body, fontWeight: "700" },
 });

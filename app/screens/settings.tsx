@@ -22,7 +22,10 @@ export default function SettingsScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color={C.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Ajustes</Text>
+        <View style={styles.headerTitleRow}>
+          <Ionicons name="settings-outline" size={18} color={C.accent} />
+          <Text style={styles.headerTitle}>Ajustes</Text>
+        </View>
         <View style={styles.backBtn} />
       </View>
 
@@ -105,7 +108,10 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.appInfo}>
-          <Text style={styles.appVersion}>Athlo v1.0.0 · Honduras</Text>
+          <View style={styles.appVersionRow}>
+            <Ionicons name="phone-portrait-outline" size={14} color={C.textSoft} />
+            <Text style={styles.appVersion}>Athlo v1.0.0 · Honduras</Text>
+          </View>
           <Text style={styles.appCopy}>© 2024 Athlo. Todos los derechos reservados.</Text>
         </View>
       </ScrollView>
@@ -193,10 +199,8 @@ const styles = StyleSheet.create({
     justifyContent: "center", alignItems: "center",
     borderRadius: 18, backgroundColor: C.accentLight,
   },
-  headerTitle: {
-    flex: 1, textAlign: "center",
-    fontSize: T.heading, fontWeight: "800", color: C.primary,
-  },
+  headerTitleRow: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  headerTitle: { fontSize: T.heading, fontWeight: "800", color: C.primary },
 
   content: { padding: 16, paddingBottom: 40 },
 
@@ -231,6 +235,7 @@ const styles = StyleSheet.create({
   rowSublabel: { fontSize: 11, color: C.textMuted, marginTop: 1 },
 
   appInfo: { alignItems: "center", marginTop: 32 },
-  appVersion: { fontSize: 12, color: C.textSoft, marginBottom: 4 },
+  appVersionRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 },
+  appVersion: { fontSize: 12, color: C.textSoft },
   appCopy: { fontSize: 11, color: C.textSoft },
 });

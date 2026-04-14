@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { AuthService } from "@/services/auth.service";
 import { AppTheme } from "@/constants/theme";
 import { AthloLogo } from "@/assets/AthloLogo";
@@ -36,14 +35,17 @@ export default function LoginScreen() {
       Alert.alert("Error", "Por favor completa todos los campos");
       return;
     }
+
     if (!isLogin && !name.trim()) {
       Alert.alert("Error", "Por favor ingresa tu nombre");
       return;
     }
+
     if (!isLogin && password.length < 6) {
       Alert.alert("Error", "La contraseña debe tener al menos 6 caracteres");
       return;
     }
+
     setLoading(true);
     try {
       if (isLogin) {
@@ -73,7 +75,6 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Logo fijo — no se mueve con el teclado */}
       <View style={styles.logoSection}>
         <View style={styles.logoBg}>
           <AthloLogo size={170} variant="light" />
@@ -91,9 +92,7 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
         >
-          {/* ── Card ─────────────────────────────────── */}
           <View style={styles.card}>
-            {/* Tab switcher */}
             <View style={styles.tabRow}>
               <TouchableOpacity
                 style={[styles.tab, isLogin && styles.tabActive]}
@@ -114,12 +113,9 @@ export default function LoginScreen() {
             </View>
 
             <Text style={styles.cardSubtitle}>
-              {isLogin
-                ? "Bienvenido de vuelta"
-                : "Únete y empieza a reservar"}
+              {isLogin ? "Bienvenido de vuelta" : "Únete y empieza a reservar"}
             </Text>
 
-            {/* Nombre (solo registro) */}
             {!isLogin && (
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Nombre completo</Text>
@@ -137,7 +133,6 @@ export default function LoginScreen() {
               </View>
             )}
 
-            {/* Email */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Correo electrónico</Text>
               <View style={styles.inputRow}>
@@ -155,7 +150,6 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            {/* Contraseña */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Contraseña</Text>
               <View style={styles.inputRow}>
@@ -178,7 +172,6 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            {/* Selector de rol (solo registro) */}
             {!isLogin && (
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Tipo de cuenta</Text>
@@ -222,7 +215,6 @@ export default function LoginScreen() {
               </View>
             )}
 
-            {/* Botón principal */}
             <TouchableOpacity
               style={[styles.primaryBtn, loading && styles.btnDisabled]}
               onPress={handleSubmit}
@@ -246,18 +238,13 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            {/* Divider */}
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
               <Text style={styles.dividerText}>o</Text>
               <View style={styles.dividerLine} />
             </View>
 
-            {/* Toggle */}
-            <TouchableOpacity
-              style={styles.toggleBtn}
-              onPress={switchMode}
-            >
+            <TouchableOpacity style={styles.toggleBtn} onPress={switchMode}>
               <Text style={styles.toggleText}>
                 {isLogin ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
                 <Text style={styles.toggleLink}>
@@ -267,10 +254,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Footer */}
-          <Text style={styles.footer}>
-            Reserva canchas deportivas en Honduras
-          </Text>
+          <Text style={styles.footer}>Reserva canchas deportivas en Honduras</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -289,7 +273,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 36,
   },
-
   logoSection: {
     alignItems: "center",
     paddingTop: 24,
@@ -306,11 +289,10 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   tagline: {
-    color: "rgba(255,255,255,0.6)",
+    color: C.textMuted,
     fontSize: T.small,
     letterSpacing: 0.5,
   },
-
   card: {
     backgroundColor: C.white,
     borderRadius: R.xl,
@@ -348,7 +330,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
-
   inputGroup: { marginBottom: 16 },
   inputLabel: {
     fontSize: T.small,
@@ -373,8 +354,6 @@ const styles = StyleSheet.create({
     color: C.text,
   },
   inputFlex: { flex: 1 },
-
-  // Selector de rol
   roleRow: {
     flexDirection: "row",
     gap: 10,
@@ -410,7 +389,6 @@ const styles = StyleSheet.create({
   roleDescActive: {
     color: "rgba(255,255,255,0.8)",
   },
-
   primaryBtn: {
     backgroundColor: C.accent,
     borderRadius: R.md,
@@ -428,7 +406,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 0.3,
   },
-
   divider: {
     flexDirection: "row",
     alignItems: "center",
@@ -444,7 +421,6 @@ const styles = StyleSheet.create({
     fontSize: T.small,
     color: C.textSoft,
   },
-
   toggleBtn: { alignItems: "center" },
   toggleText: {
     fontSize: T.small,
@@ -454,10 +430,9 @@ const styles = StyleSheet.create({
     color: C.primary,
     fontWeight: "700",
   },
-
   footer: {
     textAlign: "center",
-    color: "rgba(255,255,255,0.35)",
+    color: C.textSoft,
     fontSize: T.xs,
     marginTop: 24,
     letterSpacing: 0.3,

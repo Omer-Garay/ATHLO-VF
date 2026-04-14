@@ -16,7 +16,7 @@ export interface Booking {
   discount_applied: number;
   booking_status: "pending" | "confirmed" | "cancelled" | "completed" | "no_show";
   cancellation_reason: string | null;
-  payment_status: "pending" | "completed" | "refunded" | "failed";
+  payment_status: "pending" | "completed" | "cancelled" | "failed";
   payment_method: string | null;
   number_of_players: number | null;
   notes: string | null;

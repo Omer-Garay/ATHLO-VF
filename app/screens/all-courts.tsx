@@ -175,7 +175,10 @@ export default function AllCourtsScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color={C.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Canchas</Text>
+        <View style={styles.headerTitleRow}>
+          <Ionicons name="football-outline" size={18} color={C.accent} />
+          <Text style={styles.headerTitle}>Canchas</Text>
+        </View>
         <View style={styles.backBtn} />
       </View>
 
@@ -224,9 +227,12 @@ export default function AllCourtsScreen() {
 
       {/* ── Sort + count ────────────────────────── */}
       <View style={styles.sortSection}>
-        <Text style={styles.resultsCount}>
+        <View style={styles.resultsCountRow}>
+          <Ionicons name="funnel-outline" size={14} color={C.textMuted} />
+          <Text style={styles.resultsCount}>
           {filteredCourts.length} cancha{filteredCourts.length !== 1 ? "s" : ""}
-        </Text>
+          </Text>
+        </View>
         <View style={styles.sortRow}>
           {SORT_OPTIONS.map((s) => {
             const isActive = sortBy === s.key;
@@ -287,10 +293,8 @@ const styles = StyleSheet.create({
     justifyContent: "center", alignItems: "center",
     borderRadius: 18, backgroundColor: C.accentLight,
   },
-  headerTitle: {
-    flex: 1, textAlign: "center",
-    fontSize: T.heading, fontWeight: "800", color: C.primary,
-  },
+  headerTitleRow: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  headerTitle: { fontSize: T.heading, fontWeight: "800", color: C.primary },
 
   searchBar: {
     flexDirection: "row", alignItems: "center", gap: 8,
@@ -319,7 +323,8 @@ const styles = StyleSheet.create({
   catLabelActive: { color: C.accentDark, fontWeight: "700" },
 
   sortSection: { paddingHorizontal: 16, paddingBottom: 8 },
-  resultsCount: { fontSize: T.small, color: C.textMuted, marginBottom: 6 },
+  resultsCountRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 },
+  resultsCount: { fontSize: T.small, color: C.textMuted },
   sortRow: { flexDirection: "row", gap: 6, flexWrap: "wrap" },
   sortBtn: {
     flexDirection: "row", alignItems: "center", gap: 4,

@@ -808,7 +808,20 @@ export default function AdminScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => activeView === "menu" ? router.back() : setActiveView("menu")}>
           <Ionicons name="arrow-back" size={20} color={C.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{viewTitles[activeView]}</Text>
+        <View style={styles.headerTitleRow}>
+          <Ionicons
+            name={
+              activeView === "menu" ? "shield-checkmark-outline"
+              : activeView === "overview" ? "grid-outline"
+              : activeView === "courts" ? "football-outline"
+              : activeView === "bookings" ? "calendar-outline"
+              : "cash-outline"
+            }
+            size={18}
+            color={C.accent}
+          />
+          <Text style={styles.headerTitle}>{viewTitles[activeView]}</Text>
+        </View>
         <View style={{ width: 36 }} />
       </View>
       <View style={styles.content}>
@@ -864,7 +877,8 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: C.background },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.border, backgroundColor: C.white },
   backBtn: { width: 36, height: 36, justifyContent: "center", alignItems: "center", borderRadius: 18, backgroundColor: C.accentLight },
-  headerTitle: { flex: 1, textAlign: "center", fontSize: T.heading, fontWeight: "800", color: C.primary },
+  headerTitleRow: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  headerTitle: { fontSize: T.heading, fontWeight: "800", color: C.primary },
   content: { flex: 1, padding: 16 },
   menuGrid: { gap: 12 },
   menuCard: { flexDirection: "row", alignItems: "center", gap: 14, backgroundColor: C.white, borderRadius: R.lg, padding: 16, ...AppTheme.shadow.card, borderWidth: 1, borderColor: C.border },

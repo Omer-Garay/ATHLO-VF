@@ -1,10 +1,10 @@
 /**
  * routes/bookings.ts
- * GET  /bookings            — Reservas del usuario autenticado
- * GET  /bookings/:id        — Detalle de una reserva
- * POST /bookings            — Crear reserva (valida disponibilidad)
- * POST /bookings/:id/cancel — Cancelar reserva
- * POST /bookings/:id/rate   — Calificar una reserva completada
+ * GET  /bookings            - Reservas del usuario autenticado
+ * GET  /bookings/:id        - Detalle de una reserva
+ * POST /bookings            - Crear reserva
+ * POST /bookings/:id/cancel - Cancelar reserva
+ * POST /bookings/:id/rate   - Calificar una reserva completada
  */
 import { Router } from "express";
 import { supabase } from "../db/client.js";
@@ -13,7 +13,6 @@ import { requireAuth, AuthRequest } from "../middleware/auth.js";
 const router = Router();
 router.use(requireAuth);
 
-// ─── GET /bookings ────────────────────────────────────────────────────────────
 router.get("/", async (req: AuthRequest, res) => {
   const { client_id } = req.authUser!;
   if (!client_id) return res.json({ bookings: [] });
@@ -67,7 +66,6 @@ router.get("/", async (req: AuthRequest, res) => {
   res.json({ bookings });
 });
 
-// ─── GET /bookings/:id ────────────────────────────────────────────────────────
 router.get("/:id", async (req: AuthRequest, res) => {
   const { client_id } = req.authUser!;
   const { data, error } = await supabase
@@ -81,72 +79,84 @@ router.get("/:id", async (req: AuthRequest, res) => {
   res.json({ booking: data });
 });
 
-// ─── POST /bookings ───────────────────────────────────────────────────────────
 router.post("/", async (req: AuthRequest, res) => {
   const { field_id, booking_date, start_time, end_time, number_of_players, payment_method_id, promo_code, notes } = req.body;
   let { client_id, user_id } = req.authUser!;
-  if ((req as any)._resolved_client_id) client_id = (req as any)._resolved_client_id;
 
   if (!field_id || !booking_date || !start_time || !end_time) {
     return res.status(400).json({ error: "field_id, booking_date, start_time y end_time son requeridos" });
   }
+
   if (!client_id) {
-    // El usuario admin/provider no tiene client_id. 
-    // Intentar crear perfil de cliente automáticamente para permitir reservas de prueba.
-    const { supabase } = await import("../db/client.js");
-    const { data: newCp, error: cpErr } = await supabase
+    const { data: newClientProfile, error: clientProfileError } = await supabase
       .from("client_profiles")
       .insert({ user_id: req.authUser!.user_id })
       .select("client_id")
       .single();
-    if (cpErr || !newCp) {
+
+    if (clientProfileError || !newClientProfile) {
       return res.status(403).json({
         error: "Esta cuenta no tiene perfil de cliente. Las reservas requieren un perfil de cliente.",
       });
     }
-    req.authUser!.client_id = newCp.client_id;
-    // Re-asignar para el resto del handler
-    (req as any)._resolved_client_id = newCp.client_id;
+
+    client_id = newClientProfile.client_id;
+    req.authUser!.client_id = newClientProfile.client_id;
   }
 
-  // Validar fecha futura
   const bookingDt = new Date(`${booking_date}T${start_time}`);
   if (bookingDt <= new Date()) {
     return res.status(400).json({ error: "No puedes reservar en fechas u horas pasadas" });
   }
 
-  // Verificar si el slot ya está tomado
-  const { data: conflict } = await supabase
+  const [startH, startM] = start_time.split(":").map(Number);
+  const [endH, endM] = end_time.split(":").map(Number);
+  const startMinutes = startH * 60 + startM;
+  const endMinutes = endH * 60 + endM;
+
+  if (Number.isNaN(startMinutes) || Number.isNaN(endMinutes) || endMinutes <= startMinutes) {
+    return res.status(400).json({ error: "La hora de fin debe ser mayor que la hora de inicio" });
+  }
+
+  const { data: sameDayBookings, error: sameDayBookingsError } = await supabase
     .from("bookings")
-    .select("booking_id")
+    .select("booking_id, start_time, end_time, booking_status")
     .eq("field_id", field_id)
     .eq("booking_date", booking_date)
-    .eq("start_time", start_time)
-    .not("booking_status", "in", "(cancelled)")
-    .maybeSingle();
+    .not("booking_status", "in", "(cancelled)");
 
-  if (conflict) {
+  if (sameDayBookingsError) {
+    return res.status(500).json({ error: sameDayBookingsError.message });
+  }
+
+  const hasConflict = (sameDayBookings ?? []).some((booking: any) => {
+    const [existingStartH, existingStartM] = booking.start_time.split(":").map(Number);
+    const [existingEndH, existingEndM] = booking.end_time.split(":").map(Number);
+    const existingStartMinutes = existingStartH * 60 + existingStartM;
+    const existingEndMinutes = existingEndH * 60 + existingEndM;
+
+    return startMinutes < existingEndMinutes && endMinutes > existingStartMinutes;
+  });
+
+  if (hasConflict) {
     return res.status(409).json({ error: "Este horario ya no está disponible" });
   }
 
-  // Obtener precio de la cancha y provider
-  const { data: field } = await supabase
+  const { data: field, error: fieldError } = await supabase
     .from("fields")
     .select("price_per_hour, facilities(provider_id)")
     .eq("field_id", field_id)
     .single();
 
-  if (!field) return res.status(404).json({ error: "Cancha no encontrada" });
+  if (fieldError || !field) {
+    return res.status(404).json({ error: "Cancha no encontrada" });
+  }
 
-  // Calcular duración y precio
-  const [startH] = start_time.split(":").map(Number);
-  const [endH] = end_time.split(":").map(Number);
-  const durationHours = endH - startH;
+  const durationHours = (endMinutes - startMinutes) / 60;
   let totalPrice = Number(field.price_per_hour) * durationHours;
   let discountApplied = 0;
   const providerId = (field.facilities as any)?.provider_id;
 
-  // Aplicar código promocional si existe
   if (promo_code) {
     const { data: promo } = await supabase
       .from("promotional_codes")
@@ -159,20 +169,24 @@ router.post("/", async (req: AuthRequest, res) => {
     if (promo) {
       if (promo.discount_type === "percentage") {
         discountApplied = totalPrice * (Number(promo.discount_value) / 100);
-        if (promo.max_discount_value) discountApplied = Math.min(discountApplied, Number(promo.max_discount_value));
+        if (promo.max_discount_value) {
+          discountApplied = Math.min(discountApplied, Number(promo.max_discount_value));
+        }
       } else {
         discountApplied = Number(promo.discount_value);
       }
-      // Incrementar uso del código
-      await supabase.from("promotional_codes").update({ usage_count: (promo.usage_count ?? 0) + 1 }).eq("promo_code_id", promo.promo_code_id);
+
+      await supabase
+        .from("promotional_codes")
+        .update({ usage_count: (promo.usage_count ?? 0) + 1 })
+        .eq("promo_code_id", promo.promo_code_id);
     }
   }
 
   const finalPrice = Math.max(0, totalPrice - discountApplied);
   const qrToken = `QR-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
-  // Crear la reserva
-  const { data: booking, error: bookingErr } = await supabase
+  const { data: booking, error: bookingError } = await supabase
     .from("bookings")
     .insert({
       client_id,
@@ -193,9 +207,10 @@ router.post("/", async (req: AuthRequest, res) => {
     .select("booking_id")
     .single();
 
-  if (bookingErr) return res.status(500).json({ error: bookingErr.message });
+  if (bookingError) {
+    return res.status(500).json({ error: bookingError.message });
+  }
 
-  // Crear registro de pago pendiente
   await supabase.from("payments").insert({
     booking_id: booking.booking_id,
     client_id,
@@ -206,7 +221,6 @@ router.post("/", async (req: AuthRequest, res) => {
     payment_status: "pending",
   });
 
-  // Marcar time_slot como no disponible (si existe)
   await supabase
     .from("time_slots")
     .update({ is_available: false, booking_id: booking.booking_id })
@@ -214,10 +228,8 @@ router.post("/", async (req: AuthRequest, res) => {
     .eq("slot_date", booking_date)
     .eq("start_time", start_time);
 
-  // Actualizar estadísticas del cliente
   await supabase.rpc("increment_client_bookings", { p_client_id: client_id });
 
-  // Crear notificación de confirmación
   await supabase.from("notifications").insert({
     user_id,
     notification_type: "booking_confirmation",
@@ -227,7 +239,6 @@ router.post("/", async (req: AuthRequest, res) => {
     notification_channel: "in_app",
   });
 
-  // Log de actividad
   await supabase.from("activity_logs").insert({
     user_id,
     action_type: "CREATE",
@@ -244,7 +255,6 @@ router.post("/", async (req: AuthRequest, res) => {
   });
 });
 
-// ─── POST /bookings/:id/cancel ────────────────────────────────────────────────
 router.post("/:id/cancel", async (req: AuthRequest, res) => {
   const { reason } = req.body;
   const { client_id, user_id } = req.authUser!;
@@ -253,7 +263,6 @@ router.post("/:id/cancel", async (req: AuthRequest, res) => {
     return res.status(400).json({ error: "Se requiere una razón de cancelación" });
   }
 
-  // Verificar que la reserva pertenece al usuario
   const { data: booking } = await supabase
     .from("bookings")
     .select("booking_id, booking_status, booking_date, start_time, field_id")
@@ -265,7 +274,6 @@ router.post("/:id/cancel", async (req: AuthRequest, res) => {
   if (booking.booking_status === "cancelled") return res.status(400).json({ error: "La reserva ya fue cancelada" });
   if (booking.booking_status === "completed") return res.status(400).json({ error: "No puedes cancelar una reserva completada" });
 
-  // Actualizar reserva
   const { error } = await supabase
     .from("bookings")
     .update({
@@ -278,16 +286,20 @@ router.post("/:id/cancel", async (req: AuthRequest, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
 
-  // Liberar el time_slot
   await supabase
     .from("time_slots")
     .update({ is_available: true, booking_id: null })
     .eq("booking_id", req.params.id);
 
-  // Actualizar pago a reembolso pendiente
-  await supabase.from("payments").update({ payment_status: "refunded" }).eq("booking_id", req.params.id);
+  const { error: paymentError } = await supabase
+    .from("payments")
+    .update({ payment_status: "cancelled" })
+    .eq("booking_id", req.params.id);
 
-  // Notificación
+  if (paymentError) {
+    return res.status(500).json({ error: paymentError.message });
+  }
+
   await supabase.from("notifications").insert({
     user_id,
     notification_type: "booking_cancellation",
@@ -300,7 +312,6 @@ router.post("/:id/cancel", async (req: AuthRequest, res) => {
   res.json({ message: "Reserva cancelada exitosamente" });
 });
 
-// ─── POST /bookings/:id/rate ──────────────────────────────────────────────────
 router.post("/:id/rate", async (req: AuthRequest, res) => {
   const { rating } = req.body;
   const { client_id } = req.authUser!;
@@ -317,8 +328,10 @@ router.post("/:id/rate", async (req: AuthRequest, res) => {
     .single();
 
   if (!booking) return res.status(404).json({ error: "Reserva no encontrada" });
+  if (booking.booking_status !== "completed") {
+    return res.status(400).json({ error: "Solo puedes calificar reservas completadas" });
+  }
 
-  // Insertar calificación
   const { error } = await supabase.from("field_ratings").insert({
     field_id: booking.field_id,
     booking_id: booking.booking_id,
@@ -332,7 +345,6 @@ router.post("/:id/rate", async (req: AuthRequest, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  // Recalcular rating promedio del field
   const { data: ratings } = await supabase
     .from("field_ratings")
     .select("rating")
@@ -340,7 +352,10 @@ router.post("/:id/rate", async (req: AuthRequest, res) => {
 
   if (ratings) {
     const avg = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
-    await supabase.from("fields").update({ rating: avg.toFixed(2), review_count: ratings.length }).eq("field_id", booking.field_id);
+    await supabase
+      .from("fields")
+      .update({ rating: avg.toFixed(2), review_count: ratings.length })
+      .eq("field_id", booking.field_id);
   }
 
   res.json({ message: "Calificación registrada exitosamente" });

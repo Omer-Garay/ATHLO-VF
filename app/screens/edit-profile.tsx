@@ -177,7 +177,7 @@ export default function EditProfileScreen() {
       });
 
       setProfile(user);
-      Alert.alert("¡Perfil actualizado! ✅", message, [
+      Alert.alert("Perfil actualizado", message, [
         {
           text: "OK",
           onPress: () => router.back(),
@@ -212,7 +212,10 @@ export default function EditProfileScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color={C.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Editar Perfil</Text>
+        <View style={styles.headerTitleRow}>
+          <Ionicons name="create-outline" size={18} color={C.accent} />
+          <Text style={styles.headerTitle}>Editar Perfil</Text>
+        </View>
         <TouchableOpacity
           style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
           onPress={handleSave}
@@ -272,7 +275,10 @@ export default function EditProfileScreen() {
           {/* ── Formulario ──────────────────────────── */}
           <View style={styles.formSection}>
 
-            <Text style={styles.sectionTitle}>Información personal</Text>
+            <View style={styles.sectionTitleRow}>
+              <Ionicons name="person-outline" size={14} color={C.textMuted} />
+              <Text style={styles.sectionTitle}>Información personal</Text>
+            </View>
             <View style={styles.formCard}>
               <FieldRow
                 icon="person-outline"
@@ -302,7 +308,10 @@ export default function EditProfileScreen() {
               />
             </View>
 
-            <Text style={styles.sectionTitle}>Cuenta</Text>
+            <View style={styles.sectionTitleRow}>
+              <Ionicons name="at-outline" size={14} color={C.textMuted} />
+              <Text style={styles.sectionTitle}>Cuenta</Text>
+            </View>
             <View style={styles.formCard}>
               <FieldRow
                 icon="at-outline"
@@ -394,10 +403,8 @@ const styles = StyleSheet.create({
     backgroundColor: C.accentLight,
     justifyContent: "center", alignItems: "center",
   },
-  headerTitle: {
-    flex: 1, textAlign: "center",
-    fontSize: T.heading, fontWeight: "800", color: C.primary,
-  },
+  headerTitleRow: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  headerTitle: { fontSize: T.heading, fontWeight: "800", color: C.primary },
   saveBtn: {
     backgroundColor: C.accent,
     paddingHorizontal: 16, paddingVertical: 8,
@@ -455,10 +462,11 @@ const styles = StyleSheet.create({
 
   // Form
   formSection: { paddingHorizontal: 16, paddingTop: 20 },
+  sectionTitleRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8, paddingLeft: 4 },
   sectionTitle: {
     fontSize: 11, fontWeight: "700",
     color: C.textMuted, textTransform: "uppercase",
-    letterSpacing: 1.2, marginBottom: 8, paddingLeft: 4,
+    letterSpacing: 1.2,
   },
   formCard: {
     backgroundColor: C.white,

@@ -147,9 +147,12 @@ export default function HomeScreen() {
 
         {/* Greeting */}
         <View style={styles.greetingSection}>
-          <Text style={styles.greeting}>
-            Hola, {userName || "Atleta"} 👋
-          </Text>
+          <View style={styles.greetingRow}>
+            <Text style={styles.greeting}>
+              Hola, {userName || "Atleta"}
+            </Text>
+            <Ionicons name="person-circle-outline" size={18} color={C.accent} />
+          </View>
           <Text style={styles.subtitle}>¿Qué cancha reservamos hoy?</Text>
         </View>
 
@@ -157,7 +160,10 @@ export default function HomeScreen() {
         {showNotifications && (
           <View style={styles.notifPanel}>
             {notifications.length === 0 ? (
-              <Text style={styles.notifEmpty}>Sin notificaciones nuevas</Text>
+              <View style={styles.inlineInfoRow}>
+                <Ionicons name="notifications-off-outline" size={16} color={C.textMuted} />
+                <Text style={styles.notifEmpty}>Sin notificaciones nuevas</Text>
+              </View>
             ) : (
               notifications.slice(0, 4).map((n) => (
                 <TouchableOpacity
@@ -201,7 +207,10 @@ export default function HomeScreen() {
 
         {/* ── Categorías de deportes ─────────────── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitleLight}>Deportes</Text>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons name="grid-outline" size={16} color={C.accent} />
+            <Text style={styles.sectionTitleLight}>Deportes</Text>
+          </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
             {SportCategories.map((cat) => (
               <TouchableOpacity
@@ -221,7 +230,10 @@ export default function HomeScreen() {
         {/* ── Canchas Destacadas ─────────────────── */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitleLight}>Canchas Destacadas</Text>
+            <View style={styles.sectionTitleInline}>
+              <Ionicons name="star-outline" size={16} color={C.accent} />
+              <Text style={styles.sectionTitleInlineLight}>Canchas Destacadas</Text>
+            </View>
             <TouchableOpacity onPress={() => router.push({ pathname: "/screens/all-courts", params: { category: "Todos" } })}>
               <Text style={styles.seeAll}>Ver más</Text>
             </TouchableOpacity>
@@ -236,7 +248,10 @@ export default function HomeScreen() {
         {/* ── Canchas Populares ──────────────────── */}
         <View style={styles.sectionWhite}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitleDark}>Canchas Populares</Text>
+            <View style={styles.sectionTitleInline}>
+              <Ionicons name="flame-outline" size={16} color={C.accent} />
+              <Text style={styles.sectionTitleDark}>Canchas Populares</Text>
+            </View>
             <TouchableOpacity onPress={() => router.push({ pathname: "/screens/all-courts", params: { category: "Todos" } })}>
               <Text style={styles.seeAllDark}>Ver más</Text>
             </TouchableOpacity>
@@ -362,6 +377,7 @@ const styles = StyleSheet.create({
   notifBadgeText: { color: "#fff", fontSize: 8, fontWeight: "700" },
 
   greetingSection: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 18 },
+  greetingRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   greeting: { fontSize: T.heading, fontWeight: "700", color: "#fff" },
   subtitle: { fontSize: T.small, color: "rgba(255,255,255,0.6)", marginTop: 3 },
 
@@ -379,7 +395,8 @@ const styles = StyleSheet.create({
   },
   notifItemUnread: { backgroundColor: C.accentLight, borderRadius: 8 },
   notifText: { flex: 1, fontSize: T.small, color: C.text },
-  notifEmpty: { textAlign: "center", color: C.textMuted, fontSize: T.small, paddingVertical: 8 },
+  inlineInfoRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 8 },
+  notifEmpty: { textAlign: "center", color: C.textMuted, fontSize: T.small },
 
   // Search
   searchContainer: {
@@ -400,11 +417,17 @@ const styles = StyleSheet.create({
     paddingTop: 22, paddingHorizontal: 20,
     paddingBottom: 0,
   },
+  sectionTitleRow: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingHorizontal: 20, marginBottom: 12,
+  },
   sectionHeader: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
     paddingHorizontal: 20, marginBottom: 14,
   },
-  sectionTitleLight: { fontSize: T.body, fontWeight: "700", color: "#fff", paddingHorizontal: 20, marginBottom: 12 },
+  sectionTitleInline: { flexDirection: "row", alignItems: "center", gap: 8 },
+  sectionTitleLight: { fontSize: T.body, fontWeight: "700", color: "#fff" },
+  sectionTitleInlineLight: { fontSize: T.body, fontWeight: "700", color: "#fff" },
   sectionTitleDark: { fontSize: T.body, fontWeight: "700", color: C.text },
   seeAll: { fontSize: T.small, color: C.accent, fontWeight: "600" },
   seeAllDark: { fontSize: T.small, color: C.accent, fontWeight: "600" },

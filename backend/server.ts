@@ -63,14 +63,14 @@ app.use((_req, res) => res.status(404).json({ error: "Ruta no encontrada" }));
 
 // Error handler global
 app.use((err: any, _req: any, res: any, _next: any) => {
-  console.error("❌ Error:", err.message ?? err);
+  console.error("Error:", err.message ?? err);
   res.status(err.status ?? 500).json({ error: err.message ?? "Error interno del servidor" });
 });
 
 // ─── Arrancar ─────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`\n🚀 Athlo API → http://localhost:${PORT}`);
-  console.log(`📊 Supabase  → ${process.env.SUPABASE_URL}`);
+  console.log(`\nAthlo API: http://localhost:${PORT}`);
+  console.log(`Supabase: ${process.env.SUPABASE_URL}`);
   console.log(`\nEndpoints disponibles:`);
   console.log(`  GET  /health`);
   console.log(`  POST /auth/signup`);
