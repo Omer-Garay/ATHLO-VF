@@ -127,7 +127,7 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} />
         }
       >
-        {/* ── Header ─────────────────────────────── */}
+        {/* Header */}
         <View style={styles.headerRight}>
           <AthloLogo size={150} variant="dark" />
           <View style={styles.headerLeft}>
@@ -156,7 +156,7 @@ export default function HomeScreen() {
           <Text style={styles.subtitle}>¿Qué cancha reservamos hoy?</Text>
         </View>
 
-        {/* ── Notificaciones desplegables ────────── */}
+        {/* Notificaciones desplegables */}
         {showNotifications && (
           <View style={styles.notifPanel}>
             {notifications.length === 0 ? (
@@ -186,7 +186,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* ── Search Bar ──────────────────────────── */}
+        {/* Search Bar */}
         <View style={styles.searchContainer}>
           <Ionicons name="search-outline" size={18} color={C.textMuted} />
           <TextInput
@@ -205,7 +205,7 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* ── Categorías de deportes ─────────────── */}
+        {/* Categorías de deportes */}
         <View style={styles.section}>
           <View style={styles.sectionTitleRow}>
             <Ionicons name="grid-outline" size={16} color={C.accent} />
@@ -227,7 +227,7 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        {/* ── Canchas Destacadas ─────────────────── */}
+        {/* Canchas Destacadas */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleInline}>
@@ -245,7 +245,7 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        {/* ── Canchas Populares ──────────────────── */}
+        {/* Canchas Populares */}
         <View style={styles.sectionWhite}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleInline}>
@@ -266,7 +266,6 @@ export default function HomeScreen() {
   );
 }
 
-// ─── Sub-componentes ──────────────────────────────────────────────────────────
 
 function FeaturedCard({ court, onPress }: { court: Court; onPress: (c: Court) => void }) {
   return (
@@ -337,7 +336,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: C.overlay },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: C.background },
 
-  // Header
+  
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -356,7 +355,7 @@ const styles = StyleSheet.create({
   headerLeft: { 
     flexDirection: "row", 
     alignItems: "center", 
-    paddingLeft: 140, // Espaciado estándar desde el borde izquierdo
+    paddingLeft: 140, 
   },
   notifBtn2: {
     width: 40, 
@@ -381,7 +380,7 @@ const styles = StyleSheet.create({
   greeting: { fontSize: T.heading, fontWeight: "700", color: "#fff" },
   subtitle: { fontSize: T.small, color: "rgba(255,255,255,0.6)", marginTop: 3 },
 
-  // Notif panel
+  
   notifPanel: {
     marginHorizontal: 20, marginBottom: 12,
     backgroundColor: C.white,
@@ -398,7 +397,7 @@ const styles = StyleSheet.create({
   inlineInfoRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 8 },
   notifEmpty: { textAlign: "center", color: C.textMuted, fontSize: T.small },
 
-  // Search
+  
   searchContainer: {
     flexDirection: "row", alignItems: "center",
     backgroundColor: C.white,
@@ -409,7 +408,7 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, fontSize: T.body, color: C.text },
 
-  // Sections
+
   section: { marginBottom: 10 },
   sectionWhite: {
     backgroundColor: C.white,
@@ -432,7 +431,7 @@ const styles = StyleSheet.create({
   seeAll: { fontSize: T.small, color: C.accent, fontWeight: "600" },
   seeAllDark: { fontSize: T.small, color: C.accent, fontWeight: "600" },
 
-  // Categories
+ 
   categoriesScroll: { paddingLeft: 20, paddingBottom: 4 },
   categoryChip: {
     flexDirection: "row", alignItems: "center", gap: 6,
@@ -450,7 +449,7 @@ const styles = StyleSheet.create({
   categoryLabel: { color: "rgba(255,255,255,0.85)", fontSize: T.small, fontWeight: "600" },
   categoryLabelActive: { color: "#fff" },
 
-  // Featured card
+ 
   featuredCard: {
     width: 240, height: 162, borderRadius: R.lg,
     marginRight: 14, overflow: "hidden",
@@ -480,7 +479,7 @@ const styles = StyleSheet.create({
   },
   featuredPrice: { color: "#fff", fontSize: 13, fontWeight: "700" },
 
-  // Popular card
+
   popularCard: {
     flexDirection: "row", alignItems: "center",
     backgroundColor: C.white,

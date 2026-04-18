@@ -56,12 +56,10 @@ export default function PerfilScreen() {
         setAvatarUrl(meta.avatar_url);
       }
     }
-    // Cargar perfil completo desde el backend para obtener datos frescos
+    // Cargar perfil completo desde el backend
     try {
       const { user } = await ProfileService.getProfile();
       setUserName(`${user.first_name} ${user.last_name}`.trim());
-      // Solo actualizar avatarUrl si el valor cambió realmente.
-      // Comparamos la URL base sin el ?t= para no ciclar infinitamente.
       const newUrl = user.profile_image_url;
       const currentBase = avatarUrl?.split("?")[0] ?? null;
       const newBase     = newUrl?.split("?")[0] ?? null;
@@ -126,7 +124,7 @@ export default function PerfilScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
-        {/* ── Hero de perfil ──────────────────────── */}
+        {/* Hero de perfil  */}
         <View style={styles.hero}>
           {/* Patrón decorativo de fondo */}
           <View style={styles.heroDecor1} />
@@ -168,7 +166,7 @@ export default function PerfilScreen() {
           </View>
         </View>
 
-        {/* ── Grupos de menú ─────────────────────── */}
+        {/* Grupos de menú */}
         <View style={styles.menuSection}>
           {menuGroups.map((group) => (
             <View key={group.title} style={styles.menuGroup}>
